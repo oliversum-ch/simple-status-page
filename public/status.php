@@ -24,8 +24,10 @@ if ($site === null) {
 
 $checks = fetch_site_checks($pdo, (int) $site['id'], 20);
 $incidents = fetch_site_incidents($pdo, (int) $site['id'], 10);
+$uptimeChecks = fetch_site_checks_since($pdo, (int) $site['id'], new DateTimeImmutable('-89 days midnight'));
+$uptimeTimeline = build_uptime_timeline($uptimeChecks, 90);
 
-public_layout($site['name'] . ' Status', function () use ($site, $checks, $incidents): void {
+public_layout($site['name'] . ' Status', function () use ($site, $checks, $incidents, $uptimeTimeline): void {
     ?>
     <section class="panel hero">
         <div>
@@ -41,6 +43,27 @@ public_layout($site['name'] . ' Status', function () use ($site, $checks, $incid
             <p class="small">Last checked: <?= e(format_checked_at($site['last_checked_at'])) ?></p>
             <p class="small">Last HTTP code: <?= e($site['last_http_code'] ? (string) $site['last_http_code'] : 'n/a') ?></p>
             <p class="small">Last error: <?= e($site['last_error_message'] ?: 'None') ?></p>
+        </div>
+    </section>
+
+    <section class="panel stack">
+        <div>
+            <div class="eyebrow">90-Day Uptime</div>
+            <h2>Availability history</h2>
+        </div>
+        <div class="uptime-strip" role="img" aria-label="<?= e(format_uptime_percentage($uptimeTimeline['uptime_percentage'])) ?>">
+            <?php foreach ($uptimeTimeline['days'] as $day): ?>
+                <span
+                    class="uptime-bar uptime-<?= e($day['state']) ?>"
+                    title="<?= e($day['label']) ?>"
+                    aria-hidden="true"
+                ></span>
+            <?php endforeach; ?>
+        </div>
+        <div class="uptime-legend">
+            <span>90 days ago</span>
+            <span><?= e(format_uptime_percentage($uptimeTimeline['uptime_percentage'])) ?></span>
+            <span>Today</span>
         </div>
     </section>
 

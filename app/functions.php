@@ -220,11 +220,111 @@ function fetch_site_checks(PDO $pdo, int $siteId, int $limit = 30): array
     return $stmt->fetchAll();
 }
 
+function fetch_site_checks_since(PDO $pdo, int $siteId, DateTimeImmutable $since): array
+{
+    $stmt = $pdo->prepare('
+        SELECT status, checked_at
+        FROM checks
+        WHERE website_id = :website_id AND checked_at >= :since
+        ORDER BY checked_at ASC
+    ');
+    $stmt->execute([
+        'website_id' => $siteId,
+        'since' => $since->format('Y-m-d H:i:s'),
+    ]);
+
+    return $stmt->fetchAll();
+}
+
 function fetch_site_incidents(PDO $pdo, int $siteId, int $limit = 10): array
 {
     $stmt = $pdo->prepare('SELECT * FROM incidents WHERE website_id = :website_id ORDER BY started_at DESC LIMIT ' . (int) $limit);
     $stmt->execute(['website_id' => $siteId]);
     return $stmt->fetchAll();
+}
+
+function build_uptime_timeline(array $checks, int $days = 90): array
+{
+    $today = new DateTimeImmutable('today');
+    $dayMap = [];
+    $upChecks = 0;
+    $totalChecks = count($checks);
+
+    foreach ($checks as $check) {
+        $dayKey = (new DateTimeImmutable($check['checked_at']))->format('Y-m-d');
+
+        if (!isset($dayMap[$dayKey])) {
+            $dayMap[$dayKey] = [
+                'up_count' => 0,
+                'down_count' => 0,
+            ];
+        }
+
+        if ($check['status'] === 'down') {
+            $dayMap[$dayKey]['down_count']++;
+        } else {
+            $dayMap[$dayKey]['up_count']++;
+            $upChecks++;
+        }
+    }
+
+    $timeline = [];
+
+    for ($offset = $days - 1; $offset >= 0; $offset--) {
+        $date = $today->modify('-' . $offset . ' days');
+        $key = $date->format('Y-m-d');
+        $counts = $dayMap[$key] ?? ['up_count' => 0, 'down_count' => 0];
+
+        $state = 'no-data';
+        if ($counts['down_count'] > 0 && $counts['up_count'] > 0) {
+            $state = 'degraded';
+        } elseif ($counts['down_count'] > 0) {
+            $state = 'down';
+        } elseif ($counts['up_count'] > 0) {
+            $state = 'up';
+        }
+
+        $timeline[] = [
+            'date' => $key,
+            'state' => $state,
+            'label' => uptime_bar_label($date, $counts, $state),
+        ];
+    }
+
+    $uptimePercentage = $totalChecks > 0 ? round(($upChecks / $totalChecks) * 100, 2) : null;
+
+    return [
+        'days' => $timeline,
+        'uptime_percentage' => $uptimePercentage,
+        'total_checks' => $totalChecks,
+    ];
+}
+
+function uptime_bar_label(DateTimeImmutable $date, array $counts, string $state): string
+{
+    $summary = match ($state) {
+        'up' => 'Operational all day',
+        'down' => 'Downtime detected',
+        'degraded' => 'Partial downtime detected',
+        default => 'No checks recorded',
+    };
+
+    $parts = [$date->format('M j, Y') . ': ' . $summary];
+
+    if ($counts['up_count'] > 0 || $counts['down_count'] > 0) {
+        $parts[] = sprintf('%d up / %d down checks', $counts['up_count'], $counts['down_count']);
+    }
+
+    return implode(' - ', $parts);
+}
+
+function format_uptime_percentage(?float $value): string
+{
+    if ($value === null) {
+        return 'No uptime data yet';
+    }
+
+    return number_format($value, $value >= 99 ? 2 : 1) . ' % uptime';
 }
 
 function validate_site_input(array $input): array
