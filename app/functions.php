@@ -191,7 +191,7 @@ function fetch_sites(PDO $pdo): array
 
 function fetch_public_sites(PDO $pdo): array
 {
-    $stmt = $pdo->query('SELECT * FROM websites WHERE is_active = 1 ORDER BY name ASC');
+    $stmt = $pdo->query('SELECT * FROM websites WHERE is_active = 1 AND show_on_dashboard = 1 ORDER BY name ASC');
     return $stmt->fetchAll();
 }
 
@@ -264,6 +264,7 @@ function validate_site_input(array $input): array
             'check_interval_minutes' => $checkInterval,
             'timeout_seconds' => $timeoutSeconds,
             'is_active' => !empty($input['is_active']) ? 1 : 0,
+            'show_on_dashboard' => !empty($input['show_on_dashboard']) ? 1 : 0,
         ],
     ];
 }

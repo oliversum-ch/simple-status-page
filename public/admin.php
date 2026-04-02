@@ -34,7 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         UPDATE websites
                         SET name = :name, slug = :slug, site_url = :site_url, check_url = :check_url,
                             notification_email = :notification_email, check_interval_minutes = :check_interval_minutes,
-                            timeout_seconds = :timeout_seconds, is_active = :is_active
+                            timeout_seconds = :timeout_seconds, is_active = :is_active,
+                            show_on_dashboard = :show_on_dashboard
                         WHERE id = :id
                     ');
                     $stmt->execute($data + ['slug' => $slug, 'id' => $siteId]);
@@ -45,9 +46,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $slug = generate_unique_slug($pdo, $data['name']);
                 $stmt = $pdo->prepare('
                     INSERT INTO websites
-                        (name, slug, site_url, check_url, notification_email, check_interval_minutes, timeout_seconds, is_active)
+                        (name, slug, site_url, check_url, notification_email, check_interval_minutes, timeout_seconds, is_active, show_on_dashboard)
                     VALUES
-                        (:name, :slug, :site_url, :check_url, :notification_email, :check_interval_minutes, :timeout_seconds, :is_active)
+                        (:name, :slug, :site_url, :check_url, :notification_email, :check_interval_minutes, :timeout_seconds, :is_active, :show_on_dashboard)
                 ');
                 $stmt->execute($data + ['slug' => $slug]);
                 flash('notice', 'Site created.');
@@ -78,6 +79,7 @@ $formDefaults = $editingSite ?? [
     'check_interval_minutes' => 5,
     'timeout_seconds' => 10,
     'is_active' => 1,
+    'show_on_dashboard' => 1,
 ];
 
 admin_layout('Admin', function () use ($sites, $notice, $errors, $formDefaults): void {
@@ -138,6 +140,11 @@ admin_layout('Admin', function () use ($sites, $notice, $errors, $formDefaults):
                     Track this website and show its public status page
                 </label>
 
+                <label class="small">
+                    <input type="checkbox" name="show_on_dashboard" value="1" <?= !empty($formDefaults['show_on_dashboard']) ? 'checked' : '' ?>>
+                    Show this website on the public Status Beacon dashboard
+                </label>
+
                 <div class="inline-actions">
                     <button type="submit"><?= (int) $formDefaults['id'] > 0 ? 'Save changes' : 'Add website' ?></button>
                     <?php if ((int) $formDefaults['id'] > 0): ?>
@@ -156,6 +163,7 @@ admin_layout('Admin', function () use ($sites, $notice, $errors, $formDefaults):
                 <th>Site</th>
                 <th>Status</th>
                 <th>Last check</th>
+                <th>Dashboard</th>
                 <th>Status page</th>
                 <th>Actions</th>
             </tr>
@@ -173,6 +181,7 @@ admin_layout('Admin', function () use ($sites, $notice, $errors, $formDefaults):
                         </span>
                     </td>
                     <td><?= e(format_checked_at($site['last_checked_at'])) ?></td>
+                    <td><?= !empty($site['show_on_dashboard']) ? 'Visible' : 'Hidden' ?></td>
                     <td><a href="<?= e(base_url('status.php?slug=' . urlencode($site['slug']))) ?>">Open page</a></td>
                     <td>
                         <div class="inline-actions">

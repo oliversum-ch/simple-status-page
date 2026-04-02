@@ -7,6 +7,7 @@ Simple website downtime checker and public status page built for shared webhosti
 - Track one or more websites from a small password-protected admin panel
 - Send email notifications when a monitored website changes from up to down
 - Publish one public status page per tracked website
+- Optionally hide selected websites from the public dashboard while keeping monitoring enabled
 - Run checks through a cron job instead of a long-running worker
 - Store checks and incidents in MariaDB
 
@@ -41,6 +42,16 @@ echo password_hash('change-me', PASSWORD_DEFAULT), PHP_EOL;
 ```
 
 10. Open `/login.php`, sign in, and add your websites.
+
+## Upgrade Existing Installations
+
+If you already imported an older version of the schema, run this once:
+
+```sql
+ALTER TABLE websites
+ADD COLUMN show_on_dashboard TINYINT(1) NOT NULL DEFAULT 1
+AFTER is_active;
+```
 
 ## Notes
 
