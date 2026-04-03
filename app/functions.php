@@ -122,6 +122,12 @@ function render_layout(string $title, callable $content, bool $showAdminNav): vo
         <main class="content">
             <?php $content(); ?>
         </main>
+        <footer class="footer">
+            <p>
+                &copy; <?= e((string) date('Y')) ?> Status Beacon.
+                Built by <a href="https://oliver-flueckiger.ch" target="_blank" rel="noopener noreferrer">oliver-flueckiger.ch</a>
+            </p>
+        </footer>
     </div>
     </body>
     </html>
@@ -243,7 +249,7 @@ function fetch_site_incidents(PDO $pdo, int $siteId, int $limit = 10): array
     return $stmt->fetchAll();
 }
 
-function build_uptime_timeline(array $checks, int $days = 90): array
+function build_uptime_timeline(array $checks, int $days = 7): array
 {
     $today = new DateTimeImmutable('today');
     $dayMap = [];
