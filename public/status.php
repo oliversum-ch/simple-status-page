@@ -24,8 +24,8 @@ if ($site === null) {
 
 $checks = fetch_site_checks($pdo, (int) $site['id'], 20);
 $incidents = fetch_site_incidents($pdo, (int) $site['id'], 10);
-$uptimeChecks = fetch_site_checks_since($pdo, (int) $site['id'], new DateTimeImmutable('-6 days midnight'));
-$uptimeTimeline = build_uptime_timeline($uptimeChecks, 7);
+$uptimeChecks = fetch_site_checks_since($pdo, (int) $site['id'], new DateTimeImmutable('-29 days midnight'));
+$uptimeTimeline = build_uptime_timeline($uptimeChecks, 30);
 
 public_layout($site['name'] . ' Status', function () use ($site, $checks, $incidents, $uptimeTimeline): void {
     ?>
@@ -48,7 +48,7 @@ public_layout($site['name'] . ' Status', function () use ($site, $checks, $incid
 
     <section class="panel stack">
         <div>
-            <div class="eyebrow">7-Day Uptime</div>
+            <div class="eyebrow">30-Day Uptime</div>
             <h2>Availability history</h2>
         </div>
         <div class="uptime-strip-wrap">
@@ -57,14 +57,14 @@ public_layout($site['name'] . ' Status', function () use ($site, $checks, $incid
                     <span
                         class="uptime-bar uptime-<?= e($day['state']) ?>"
                         title="<?= e($day['label']) ?>"
-                        style="display:inline-block;width:24px;height:56px;background:<?= e(uptime_bar_color($day['state'])) ?>;border:1px solid rgba(29, 42, 37, 0.08);border-radius:6px;vertical-align:bottom;"
+                        style="display:inline-block;width:12px;height:44px;background:<?= e(uptime_bar_color($day['state'])) ?>;border:1px solid rgba(29, 42, 37, 0.08);border-radius:4px;vertical-align:bottom;"
                         aria-hidden="true"
                     >&nbsp;</span>
                 <?php endforeach; ?>
             </div>
         </div>
         <div class="uptime-legend">
-            <span>7 days ago</span>
+            <span>30 days ago</span>
             <span><?= e(format_uptime_percentage($uptimeTimeline['uptime_percentage'])) ?></span>
             <span>Today</span>
         </div>

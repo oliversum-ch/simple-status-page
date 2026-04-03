@@ -249,7 +249,7 @@ function fetch_site_incidents(PDO $pdo, int $siteId, int $limit = 10): array
     return $stmt->fetchAll();
 }
 
-function build_uptime_timeline(array $checks, int $days = 7): array
+function build_uptime_timeline(array $checks, int $days = 30): array
 {
     $today = new DateTimeImmutable('today');
     $dayMap = [];
