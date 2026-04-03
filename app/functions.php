@@ -333,6 +333,16 @@ function format_uptime_percentage(?float $value): string
     return number_format($value, $value >= 99 ? 2 : 1) . ' % uptime';
 }
 
+function uptime_bar_color(string $state): string
+{
+    return match ($state) {
+        'up' => '#3ca85c',
+        'down' => '#e14949',
+        'degraded' => '#d09a2c',
+        default => '#d8d2c6',
+    };
+}
+
 function validate_site_input(array $input): array
 {
     $errors = [];

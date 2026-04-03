@@ -57,8 +57,9 @@ public_layout($site['name'] . ' Status', function () use ($site, $checks, $incid
                     <span
                         class="uptime-bar uptime-<?= e($day['state']) ?>"
                         title="<?= e($day['label']) ?>"
+                        style="display:inline-block;width:24px;height:56px;background:<?= e(uptime_bar_color($day['state'])) ?>;border:1px solid rgba(29, 42, 37, 0.08);border-radius:6px;vertical-align:bottom;"
                         aria-hidden="true"
-                    ></span>
+                    >&nbsp;</span>
                 <?php endforeach; ?>
             </div>
         </div>
