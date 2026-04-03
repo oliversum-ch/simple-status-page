@@ -245,15 +245,24 @@ button,
     font-size: 0.92rem;
 }
 
+.uptime-strip-wrap {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 4px;
+}
+
 .uptime-strip {
-    display: grid;
-    grid-template-columns: repeat(90, minmax(0, 1fr));
+    display: inline-grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 6px;
     gap: 4px;
     align-items: end;
+    min-width: max-content;
 }
 
 .uptime-bar {
     display: block;
+    width: 6px;
     height: 36px;
     border-radius: 0;
     background: #d9d4c9;
@@ -322,6 +331,7 @@ button,
     }
 
     .uptime-bar {
+        width: 5px;
         height: 28px;
     }
 

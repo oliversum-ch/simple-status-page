@@ -51,14 +51,16 @@ public_layout($site['name'] . ' Status', function () use ($site, $checks, $incid
             <div class="eyebrow">90-Day Uptime</div>
             <h2>Availability history</h2>
         </div>
-        <div class="uptime-strip" role="img" aria-label="<?= e(format_uptime_percentage($uptimeTimeline['uptime_percentage'])) ?>">
-            <?php foreach ($uptimeTimeline['days'] as $day): ?>
-                <span
-                    class="uptime-bar uptime-<?= e($day['state']) ?>"
-                    title="<?= e($day['label']) ?>"
-                    aria-hidden="true"
-                ></span>
-            <?php endforeach; ?>
+        <div class="uptime-strip-wrap">
+            <div class="uptime-strip" role="img" aria-label="<?= e(format_uptime_percentage($uptimeTimeline['uptime_percentage'])) ?>">
+                <?php foreach ($uptimeTimeline['days'] as $day): ?>
+                    <span
+                        class="uptime-bar uptime-<?= e($day['state']) ?>"
+                        title="<?= e($day['label']) ?>"
+                        aria-hidden="true"
+                    ></span>
+                <?php endforeach; ?>
+            </div>
         </div>
         <div class="uptime-legend">
             <span>90 days ago</span>
